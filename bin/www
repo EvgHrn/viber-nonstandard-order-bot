@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('viber-nonstandard-order-bot:server');
 const https = require('https');
 const fs = require('fs');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 const ViberBot = require('viber-bot').Bot;
 const BotEvents = require('viber-bot').Events;
@@ -28,7 +29,15 @@ const bot = new ViberBot({
   avatar: process.env.AVATAR
 });
 
+(async function() {
 
+  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
+
+  await doc.useApiKey(process.env.SHEET_API_KEY);
+
+  await doc.loadInfo();
+
+  console.log(`doc: `, doc.title);
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -90,7 +99,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
 });
 
 
-
+}())
 
 
 /**
