@@ -25,7 +25,7 @@ require('dotenv').config();
 const bot = new ViberBot({
   authToken: process.env.TOKEN,
   name: process.env.NAME,
-  // avatar: process.env.AVATAR
+  avatar: process.env.AVATAR
 });
 
 
@@ -33,6 +33,7 @@ const bot = new ViberBot({
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
   console.log('----------------------------------------------------------------');
+  console.log(`${new Date().toLocaleString('ru')}`);
   console.log('New message: ', message.text);
   console.log('From: ', response.userProfile.id);
   console.log('Name: ', response.userProfile.name);
@@ -119,7 +120,7 @@ console.log(`${new Date().toLocaleString('ru')} Server created: `, server);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+// server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
