@@ -1,0 +1,184 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('viber-nonstandard-order-bot:server');
+const https = require('https');
+const fs = require('fs');
+
+const ViberBot = require('viber-bot').Bot;
+const BotEvents = require('viber-bot').Events;
+const TextMessage = require('viber-bot').Message.Text;
+
+const qs = require('qs');
+const fetch = require("node-fetch");
+
+const parse = require('date-fns/parse');
+
+require('dotenv').config();
+
+
+
+const bot = new ViberBot({
+  authToken: process.env.TOKEN,
+  name: process.env.NAME,
+  // avatar: process.env.AVATAR
+});
+
+
+
+bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
+  // Echo's back the message to the client. Your bot logic should sit here.
+  console.log('----------------------------------------------------------------');
+  console.log('New message: ', message.text);
+  console.log('From: ', response.userProfile.id);
+  console.log('Name: ', response.userProfile.name);
+  bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`New message from user: ${response.userProfile.id} ${response.userProfile.name}: ${message.text}`));
+  const usersArr = JSON.parse(process.env.USERS_STR).users;
+  // // console.log('Users: ', usersArr);
+  // if(usersArr.some((userObj) => userObj.viber_id === response.userProfile.id)) {
+  //   const orderNumber = strToOrderNumber(message.text.trim());
+  //   if(orderNumber) {
+  //     if(!process.env.ST) {
+  //       console.error('Env variable error');
+  //       response.send(new TextMessage('Ошибка сервера'));
+  //       return;
+  //     }
+  //     getParsedOrderData(orderNumber, process.env.ST)
+  //         .then((orderObj) => {
+  //           if(orderObj && orderObj.data) {
+  //             const text = Object.keys(orderObj.data).reduce((acc, key) => {
+  //               acc = `${acc} *${key}* :  ${orderObj.data[key].trim()}\n`;
+  //               return acc;
+  //             }, '');
+  //             // console.log('Text: ', text);
+  //             response.send(new TextMessage(text));
+  //           } else {
+  //             response.send(new TextMessage('Ошибка сервера. Нет данных о заказе'));
+  //           }
+  //           if(orderObj && orderObj.status) {
+  //             const text = Object.keys(orderObj.status).reduce((acc, key) => {
+  //               if(orderObj.status[key].isDone) {
+  //                 acc = `${acc} *${key.slice(1, -1)}* :  ${orderObj.status[key].doneDate.toLocaleString('ru')} ${orderObj.status[key].userAccessStr}\n`;
+  //               } else {
+  //                 acc = `${acc} ${key.slice(1, -1)} :  -\n`;
+  //               }
+  //               return acc;
+  //             }, '');
+  //             // console.log('Text: ', text);
+  //             response.send(new TextMessage(text));
+  //           } else {
+  //             response.send(new TextMessage('Ошибка сервера. Нет данных о статусе'));
+  //           }
+  //         })
+  //   } else {
+  //     response.send(new TextMessage('Неверный номер'));
+  //   }
+  // } else {
+  //   const message = new TextMessage('Нет доступа');
+  //   console.log('Unknown user: ', response.userProfile);
+  //   bot.getUserDetails(response.userProfile)
+  //       .then(userDetails  => {
+  //         bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`Unknown user: ${response.userProfile.id} ${response.userProfile.name}`));
+  //       })
+  //   response.send(message);
+  // }
+});
+
+
+
+
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+const keyPathStr = `${process.env.SSL_KEY_PATH_FILE}`;
+const certPathStr = `${process.env.SSL_CERT_PATH_FILE}`;
+const caPathStr = `${process.env.SSL_CA_PATH_FILE}`;
+// console.log("SSL options: ", keyPathStr, certPathStr, caPathStr);
+const serverSSLOptions = {
+  key: fs.readFileSync(keyPathStr),
+  cert: fs.readFileSync(certPathStr),
+  ca: fs.readFileSync(caPathStr),
+};
+
+const server = https.createServer(serverSSLOptions, bot.middleware()).listen(port, () => bot.setWebhook(`${process.env.PUBLIC_URL}:${port}`));
+console.log(`${new Date().toLocaleString('ru')} Server created: `, server);
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
