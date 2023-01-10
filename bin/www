@@ -21,7 +21,7 @@ const parse = require('date-fns/parse');
 
 require('dotenv').config();
 
-
+let oldRowCount = 0;
 
 const bot = new ViberBot({
   authToken: process.env.TOKEN,
@@ -37,7 +37,24 @@ const bot = new ViberBot({
 
   await doc.loadInfo();
 
-  console.log(`doc: `, doc.title);
+  console.log(`${new Date().toLocaleString('ru')}Doc: `, doc.title);
+
+  const sheet = doc.sheetsByIndex[0];
+
+  const rowCount = sheet.rowCount;
+
+  if(oldRowCount !== rowCount) {
+    oldRowCount = rowCount;
+    const rows = await sheet.getRows();
+    const lastRow = rows[rowCount - 1];
+    const usersArr = JSON.parse(process.env.USERS_STR).users;
+    for(let userObjIndex = 0; userObjIndex++; userObjIndex < usersArr.length) {
+      const userId = usersArr[userObjIndex].viber_id;
+      const text = `${Object.keys(lastRow)}`
+      bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт: ${text}`));
+    }
+  }
+
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -48,7 +65,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   console.log('Name: ', response.userProfile.name);
   bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`New message from user: ${response.userProfile.id} ${response.userProfile.name}: ${message.text}`));
   const usersArr = JSON.parse(process.env.USERS_STR).users;
-  // // console.log('Users: ', usersArr);
+  // console.log('Users: ', usersArr);
   // if(usersArr.some((userObj) => userObj.viber_id === response.userProfile.id)) {
   //   const orderNumber = strToOrderNumber(message.text.trim());
   //   if(orderNumber) {
@@ -124,7 +141,7 @@ const serverSSLOptions = {
 };
 
 const server = https.createServer(serverSSLOptions, bot.middleware()).listen(port, () => bot.setWebhook(`${process.env.PUBLIC_URL}:${port}`));
-console.log(`${new Date().toLocaleString('ru')} Server created: `, server);
+// console.log(`${new Date().toLocaleString('ru')} Server created: `, server);
 /**
  * Listen on provided port, on all network interfaces.
  */
