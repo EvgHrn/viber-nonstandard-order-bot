@@ -29,8 +29,7 @@ const bot = new ViberBot({
   avatar: process.env.AVATAR
 });
 
-(async function() {
-
+const checkAndSend = async (oldCountInner) => {
   const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
 
   await doc.useApiKey(process.env.SHEET_API_KEY);
@@ -43,7 +42,7 @@ const bot = new ViberBot({
 
   const rowCount = sheet.rowCount;
 
-  if(oldRowCount !== rowCount) {
+  if(oldCountInner !== rowCount) {
     oldRowCount = rowCount;
     const rows = await sheet.getRows();
     const lastRow = rows[rowCount - 1];
@@ -54,7 +53,7 @@ const bot = new ViberBot({
       bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт: ${text}`));
     }
   }
-
+}
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -114,9 +113,6 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   //   response.send(message);
   // }
 });
-
-
-}())
 
 
 /**
@@ -209,3 +205,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+setInterval(() => checkAndSend(oldRowCount), 120000);
