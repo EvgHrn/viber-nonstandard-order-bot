@@ -41,22 +41,40 @@ const checkAndSend = async (oldCountInner) => {
 
   const sheet = doc.sheetsByIndex[0];
 
-  const rowCount = sheet.rowCount;
+  const newRowCount = sheet.rowCount;
 
-  console.log(`${new Date().toLocaleString('ru')} New rows count: `, rowCount);
+  console.log(`${new Date().toLocaleString('ru')} New rows count: `, newRowCount);
   console.log(`${new Date().toLocaleString('ru')} Old rows count: `, oldCountInner);
 
-  if(oldCountInner !== rowCount) {
-    console.log(`${new Date().toLocaleString('ru')} Count changes`);
-    oldRowCount = rowCount;
-    const rows = await sheet.getRows();
-    const lastRow = rows[rowCount - 1];
-    console.log(`${new Date().toLocaleString('ru')} Last row keys: `, Object.keys(lastRow).join(', '));
+  oldRowCount = newRowCount;
+
+  if(oldCountInner < newRowCount) {
+    console.log(`${new Date().toLocaleString('ru')} Count changes from ${oldCountInner} to ${newRowCount}`);
+    // const rows = await sheet.getRows();
+    await sheet.loadCells(`C2:C${newRowCount}`);
+    await sheet.loadCells(`E2:E${newRowCount}`);
+    await sheet.loadCells(`I2:I${newRowCount}`);
     const usersArr = JSON.parse(process.env.USERS_STR).users;
     for(let userObjIndex = 0; userObjIndex++; userObjIndex < usersArr.length) {
       const userId = usersArr[userObjIndex].viber_id;
-      const text = `${Object.keys(lastRow)}`
-      bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт: ${text}`));
+      let lastRowIndexWithValue = 0;
+      for(let index = 0; index++; index < newRowCount) {
+        if(!sheet.getCellByA1(`C${index+1}`).value) {
+          lastRowIndexWithValue = index;
+          break;
+        }
+      }
+      console.log(`${new Date().toLocaleString('ru')} lastRowIndexWithValue: `, lastRowIndexWithValue);
+      for(let rowIndex = 0; rowIndex++; rowIndex < (newRowCount - oldCountInner)) {
+        const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
+        const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
+        const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
+        const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
+        const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
+        console.log(`${new Date().toLocaleString('ru')} Text: `, text);
+        bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
+      }
+
     }
   }
 }
