@@ -9,17 +9,47 @@ var debug = require('debug')('viber-nonstandard-order-bot:server');
 const https = require('https');
 const fs = require('fs');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const nodemailer = require("nodemailer");
 
 const ViberBot = require('viber-bot').Bot;
 const BotEvents = require('viber-bot').Events;
 const TextMessage = require('viber-bot').Message.Text;
 
-const qs = require('qs');
-const fetch = require("node-fetch");
-
-const parse = require('date-fns/parse');
+// const qs = require('qs');
+// const fetch = require("node-fetch");
+//
+// const parse = require('date-fns/parse');
 
 require('dotenv').config();
+
+let transporter = nodemailer.createTransport({
+  host: "smtp.yandex.ru",
+  port: 465,
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: process.env.POST_USER, // generated ethereal user
+    pass: process.env.POST_PASS, // generated ethereal password
+  },
+});
+
+// send mail with defined transport object
+(async() => {
+  console.log(`${new Date().toLocaleString('ru')} Gonna send text email`);
+  let info = await transporter.sendMail({
+    from: '"Fred Foo 👻" <foo@example.com>', // sender address
+    to: "EMAIL_FOR_TEST", // list of receivers
+    subject: "Hello ✔", // Subject line
+    text: "Hello world?", // plain text body
+    html: "<b>Hello world?</b>", // html body
+  });
+
+  console.log(`${new Date().toLocaleString('ru')} Message sent: %s`, info.messageId);
+// Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+// Preview only available when sending through an Ethereal account
+  console.log(`${new Date().toLocaleString('ru')} Preview URL: %s`, nodemailer.getTestMessageUrl(info));
+// Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+})()
 
 let oldRowCount = 0;
 

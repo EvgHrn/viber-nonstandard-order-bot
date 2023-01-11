@@ -14,6 +14,7 @@
     "google-spreadsheet": "^3.3.0",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
+    "nodemailer": "^6.8.0",
     "qs": "^6.11.0",
     "viber-bot": "^1.0.18"
   }
