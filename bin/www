@@ -48,7 +48,7 @@ const checkAndSend = async (oldCountInner) => {
 
   oldRowCount = newRowCount;
 
-  if(oldCountInner < newRowCount) {
+  if((oldCountInner > 0) && (oldCountInner < newRowCount)) {
     console.log(`${new Date().toLocaleString('ru')} Count changes from ${oldCountInner} to ${newRowCount}`);
     // const rows = await sheet.getRows();
     await sheet.loadCells(`C1:C${newRowCount}`);
