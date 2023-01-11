@@ -56,9 +56,10 @@ const checkAndSend = async (oldCountInner) => {
     await sheet.loadCells(`I2:I${newRowCount}`);
     console.log(`${new Date().toLocaleString('ru')} Got cells`);
     const usersArr = JSON.parse(process.env.USERS_STR).users;
+    console.log(`${new Date().toLocaleString('ru')} Users: `, usersArr);
     for(let userObjIndex = 0; userObjIndex++; userObjIndex < usersArr.length) {
-
       const userId = usersArr[userObjIndex].viber_id;
+      console.log(`${new Date().toLocaleString('ru')}Gonna handle user `, userId);
       let lastRowIndexWithValue = 0;
       for(let index = 0; index++; index < newRowCount) {
         console.log(`${new Date().toLocaleString('ru')} Gonna check cell C${index+1}`);
