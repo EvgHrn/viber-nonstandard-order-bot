@@ -57,11 +57,11 @@ const checkAndSend = async (oldCountInner) => {
     console.log(`${new Date().toLocaleString('ru')} Got cells`);
     const usersArr = JSON.parse(process.env.USERS_STR).users;
     console.log(`${new Date().toLocaleString('ru')} Users: `, usersArr);
-    for(let userObjIndex = 0; userObjIndex++; userObjIndex < usersArr.length) {
+    for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
       const userId = usersArr[userObjIndex].viber_id;
       console.log(`${new Date().toLocaleString('ru')}Gonna handle user `, userId);
       let lastRowIndexWithValue = 0;
-      for(let index = 0; index++; index < newRowCount) {
+      for(let index = 0; index < newRowCount; index++) {
         console.log(`${new Date().toLocaleString('ru')} Gonna check cell C${index+1}`);
         console.log(`${new Date().toLocaleString('ru')} Value of cell C${index+1}: `, sheet.getCellByA1(`C${index+1}`).value);
         if(!sheet.getCellByA1(`C${index+1}`).value) {
@@ -70,7 +70,7 @@ const checkAndSend = async (oldCountInner) => {
         }
       }
       console.log(`${new Date().toLocaleString('ru')} lastRowIndexWithValue: `, lastRowIndexWithValue);
-      for(let rowIndex = 0; rowIndex++; rowIndex < (newRowCount - oldCountInner)) {
+      for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
         const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
         const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
         const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
