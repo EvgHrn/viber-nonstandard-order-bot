@@ -51,15 +51,15 @@ const checkAndSend = async (oldCountInner) => {
   if(oldCountInner < newRowCount) {
     console.log(`${new Date().toLocaleString('ru')} Count changes from ${oldCountInner} to ${newRowCount}`);
     // const rows = await sheet.getRows();
-    await sheet.loadCells(`C2:C${newRowCount}`);
-    await sheet.loadCells(`E2:E${newRowCount}`);
-    await sheet.loadCells(`I2:I${newRowCount}`);
+    await sheet.loadCells(`C1:C${newRowCount}`);
+    await sheet.loadCells(`E1:E${newRowCount}`);
+    await sheet.loadCells(`I1:I${newRowCount}`);
     console.log(`${new Date().toLocaleString('ru')} Got cells`);
     const usersArr = JSON.parse(process.env.USERS_STR).users;
     console.log(`${new Date().toLocaleString('ru')} Users: `, usersArr);
     for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
       const userId = usersArr[userObjIndex].viber_id;
-      console.log(`${new Date().toLocaleString('ru')}Gonna handle user `, userId);
+      console.log(`${new Date().toLocaleString('ru')} Gonna handle user `, userId);
       let lastRowIndexWithValue = 0;
       for(let index = 0; index < newRowCount; index++) {
         console.log(`${new Date().toLocaleString('ru')} Gonna check cell C${index+1}`);
