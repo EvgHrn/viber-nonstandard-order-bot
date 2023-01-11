@@ -36,8 +36,8 @@ let transporter = nodemailer.createTransport({
 (async() => {
   console.log(`${new Date().toLocaleString('ru')} Gonna send text email`);
   let info = await transporter.sendMail({
-    from: '"Fred Foo 👻" <foo@example.com>', // sender address
-    to: "EMAIL_FOR_TEST", // list of receivers
+    from: `"Fred Foo 👻" <${process.env.POST_USER}>`, // sender address
+    to: process.env.EMAIL_FOR_TEST, // list of receivers
     subject: "Hello ✔", // Subject line
     text: "Hello world?", // plain text body
     html: "<b>Hello world?</b>", // html body
