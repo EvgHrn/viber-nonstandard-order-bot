@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import {getLastRowIndexWithValue} from "../utils";
+import {sheetColumns} from "../constants";
+
 /**
  * Module dependencies.
  */
@@ -32,10 +35,9 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-// send mail with defined transport object
-(async() => {
+const sendEmail = async(mailTransporter, to, text) => {
   console.log(`${new Date().toLocaleString('ru')} Gonna send text email`);
-  let info = await transporter.sendMail({
+  let info = await mailTransporter.sendMail({
     from: `"Fred Foo 👻" <${process.env.POST_USER}>`, // sender address
     to: process.env.EMAIL_FOR_TEST, // list of receivers
     subject: "Hello ✔", // Subject line
@@ -49,7 +51,7 @@ let transporter = nodemailer.createTransport({
 // Preview only available when sending through an Ethereal account
   console.log(`${new Date().toLocaleString('ru')} Preview URL: %s`, nodemailer.getTestMessageUrl(info));
 // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-})()
+}
 
 let oldRowCount = 0;
 
@@ -59,7 +61,7 @@ const bot = new ViberBot({
   avatar: process.env.AVATAR
 });
 
-const checkAndSend = async (oldCountInner) => {
+const checkNewOrderRequestAndSend = async (oldCountInner) => {
 
   const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
 
@@ -80,25 +82,64 @@ const checkAndSend = async (oldCountInner) => {
 
   if((oldCountInner > 0) && (oldCountInner < newRowCount)) {
     console.log(`${new Date().toLocaleString('ru')} Count changes from ${oldCountInner} to ${newRowCount}`);
-    // const rows = await sheet.getRows();
-    await sheet.loadCells(`C1:C${newRowCount}`);
-    await sheet.loadCells(`E1:E${newRowCount}`);
-    await sheet.loadCells(`I1:I${newRowCount}`);
+    await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${newRowCount}`);
+    // await sheet.loadCells(`C1:C${newRowCount}`);
+    // await sheet.loadCells(`E1:E${newRowCount}`);
+    // await sheet.loadCells(`I1:I${newRowCount}`);
     console.log(`${new Date().toLocaleString('ru')} Got cells`);
+
+    const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
+
+    for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
+      // send to back new requests
+      const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
+      const request = {
+        timestamp: new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value),
+        email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
+        managerName: sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`).value,
+        clientStatus: sheet.getCellByA1(`${sheetColumns.clientStatus}${rowIndexForHandle}`).value,
+        productName: sheet.getCellByA1(`${sheetColumns.productName}${rowIndexForHandle}`).value,
+        description: sheet.getCellByA1(`${sheetColumns.description}${rowIndexForHandle}`).value,
+        quantity: sheet.getCellByA1(`${sheetColumns.quantity}${rowIndexForHandle}`).value,
+        region: sheet.getCellByA1(`${sheetColumns.region}${rowIndexForHandle}`).value
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value) {
+        request.attachments = sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value) {
+        request.calculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value) {
+        request.duration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value) {
+        request.comment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value) {
+        request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
+      }
+
+      await saveNonstandardOrderRequest(request);
+
+      // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
+      // const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
+      // const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
+      // const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
+      // console.log(`${new Date().toLocaleString('ru')} Text: `, text);
+      // bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
+    }
+
     const usersArr = JSON.parse(process.env.USERS_STR).users;
     console.log(`${new Date().toLocaleString('ru')} Users: `, usersArr);
     for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
       const userId = usersArr[userObjIndex].viber_id;
       console.log(`${new Date().toLocaleString('ru')} Gonna handle user `, userId);
-      let lastRowIndexWithValue = 0;
-      for(let index = 0; index < newRowCount; index++) {
-        console.log(`${new Date().toLocaleString('ru')} Gonna check cell C${index+1}`);
-        console.log(`${new Date().toLocaleString('ru')} Value of cell C${index+1}: `, sheet.getCellByA1(`C${index+1}`).value);
-        if(!sheet.getCellByA1(`C${index+1}`).value) {
-          lastRowIndexWithValue = index;
-          break;
-        }
-      }
+
       console.log(`${new Date().toLocaleString('ru')} lastRowIndexWithValue: `, lastRowIndexWithValue);
       for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
         const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
@@ -114,6 +155,10 @@ const checkAndSend = async (oldCountInner) => {
 
   }
 }
+
+const checkPrecomputationUpdate = async() => {
+
+};
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -266,6 +311,6 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-setTimeout(() => checkAndSend(oldRowCount), 5000);
+setTimeout(() => checkNewOrderRequestAndSend(oldRowCount), 5000);
 
-setInterval(() => checkAndSend(oldRowCount), 60000);
+setInterval(() => checkNewOrderRequestAndSend(oldRowCount), 60000);
