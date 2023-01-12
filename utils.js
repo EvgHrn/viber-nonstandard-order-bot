@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-export const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
+const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
 
     console.log(`${new Date().toLocaleString('ru')} Gonna save nonstandardOrderRequest: `, nonstandardOrderRequest);
 
@@ -16,7 +16,7 @@ export const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
     console.log(`${new Date().toLocaleString('ru')} Saving request result: `, result);
 }
 
-export const getLastRowIndexWithValue = (sheet) => {
+const getLastRowIndexWithValue = (sheet) => {
     const newRowCount = sheet.rowCount;
     let lastRowIndexWithValue = 0;
     for(let index = 0; index < newRowCount; index++) {
@@ -28,3 +28,8 @@ export const getLastRowIndexWithValue = (sheet) => {
         }
     }
 }
+
+module.exports = {
+    saveNonstandardOrderRequest,
+    getLastRowIndexWithValue,
+};

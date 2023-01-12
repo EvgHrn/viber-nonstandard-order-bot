@@ -1,4 +1,4 @@
-export const sheetColumns = {
+const sheetColumns = {
     timestamp: 'A',
     email: 'B',
     managerName: 'C',
@@ -13,3 +13,7 @@ export const sheetColumns = {
     comment: 'L',
     specificationPath: 'M'
 }
+
+module.exports = {
+    sheetColumns
+};
