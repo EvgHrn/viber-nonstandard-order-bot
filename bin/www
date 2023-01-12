@@ -92,10 +92,13 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
     for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
       // send to back new requests
       const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
-      console.log(`${new Date().toLocaleString('ru')} Timestamp cell value: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value);
-      console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell value: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell valueType: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).valueType);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formattedValue: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formula: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formula);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
       const request = {
-        timestamp: new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value),
+        timestamp: new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue),
         email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
         managerName: sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`).value,
         clientStatus: sheet.getCellByA1(`${sheetColumns.clientStatus}${rowIndexForHandle}`).value,
