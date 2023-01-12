@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-import {getLastRowIndexWithValue} from "../utils";
-import {sheetColumns} from "../constants";
-
 /**
  * Module dependencies.
  */
@@ -13,6 +10,8 @@ const https = require('https');
 const fs = require('fs');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const nodemailer = require("nodemailer");
+const {sheetColumns} = require('../constants');
+const {getLastRowIndexWithValue} = require('../utils');
 
 const ViberBot = require('viber-bot').Bot;
 const BotEvents = require('viber-bot').Events;
