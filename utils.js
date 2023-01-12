@@ -12,8 +12,8 @@ const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
         }),
         headers: {'Content-Type': 'application/json'}
     });
-    const result = await response.json();
-    console.log(`${new Date().toLocaleString('ru')} Saving request result: `, result);
+    // const result = await response.json();
+    console.log(`${new Date().toLocaleString('ru')} Saving request response: `, response);
 }
 
 const getLastRowIndexWithValue = (sheet) => {

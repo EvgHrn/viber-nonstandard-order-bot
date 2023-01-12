@@ -92,6 +92,8 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
     for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
       // send to back new requests
       const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
+      console.log(`${new Date().toLocaleString('ru')} Timestamp cell value: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value);
+      console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
       const request = {
         timestamp: new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value),
         email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
@@ -124,6 +126,8 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
       }
 
       await saveNonstandardOrderRequest(request);
+
+
 
       // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
       // const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
