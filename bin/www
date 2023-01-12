@@ -123,6 +123,11 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
         request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
       }
 
+      if(request.managerName === 'Тест') {
+        console.log(`${new Date().toLocaleString('ru')} Test request, so do nothing: `, request);
+        continue;
+      }
+
       await saveNonstandardOrderRequest(request);
 
       // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
