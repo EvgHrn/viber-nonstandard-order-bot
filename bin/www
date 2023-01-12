@@ -123,11 +123,6 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
         request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
       }
 
-      if(request.managerName === 'Тест') {
-        console.log(`${new Date().toLocaleString('ru')} Test request, so do nothing: `, request);
-        continue;
-      }
-
       await saveNonstandardOrderRequest(request);
 
       // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
@@ -152,6 +147,11 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
         const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
         const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
         console.log(`${new Date().toLocaleString('ru')} Text: `, text);
+
+        if(managerNameCell.value === 'Тест') {
+          console.log(`${new Date().toLocaleString('ru')} Test request, so do not send to bot`);
+          continue;
+        }
         bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
       }
 
