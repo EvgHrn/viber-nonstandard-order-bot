@@ -27,6 +27,7 @@ const getLastRowIndexWithValue = (sheet) => {
             break;
         }
     }
+    return lastRowIndexWithValue;
 }
 
 module.exports = {
