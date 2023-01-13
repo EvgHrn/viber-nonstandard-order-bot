@@ -159,7 +159,7 @@ const checkPrecomputationUpdate = async(sheet) => {
 
   const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
   for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
-    const timestamp = new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue);
+    const timestamp = sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue;
 
     // get data from db
     // {
