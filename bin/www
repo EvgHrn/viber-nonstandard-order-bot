@@ -82,7 +82,7 @@ const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
       // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formula: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formula);
       // console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
       const request = {
-        timestamp: new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue),
+        timestamp: sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue,
         email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
         managerName: sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`).value,
         clientStatus: sheet.getCellByA1(`${sheetColumns.clientStatus}${rowIndexForHandle}`).value,
@@ -155,12 +155,40 @@ const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
 }
 
 const checkPrecomputationUpdate = async(sheet) => {
+
+
   const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
   for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
     const timestamp = new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue);
+
+    // get data from db
+    // {
+    //   _id: '63bfef9f6c2ef30059f6a5ae',
+    //       timestamp: '2023-12-01T11:31:16.000Z',
+    //     email: 'nsb@inari.pro',
+    //     managerName: 'Комлева Екатерина',
+    //     clientStatus: 'без статуса',
+    //     productName: 'акрил',
+    //     description: '400х300 мм ЭКСТРУЗИЯ зеркальное золото 1,5 мм',
+    //     quantity: '200шт/400шт',
+    //     region: 'Р8 Екатеринбург',
+    //     createdAt: '2023-01-12T11:31:43.754Z',
+    //     updatedAt: '2023-01-12T11:31:43.754Z',
+    //     __v: 0
+    // }
     const request = await getNonstandardOrderRequestFromDbByTimestamp(timestamp);
     console.log(`${new Date().toLocaleString('ru')} checkPrecomputationUpdate: Request from db: `, request);
+
+    // get data from sheet
+
+    // compare data
+
+    // if change send to manager and update in db
+
+
   }
+
+
 };
 
 const checkUpdates = async(oldRowCount) => {

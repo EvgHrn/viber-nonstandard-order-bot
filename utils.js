@@ -23,7 +23,8 @@ const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
 
 const getNonstandardOrderRequestFromDbByTimestamp = async(timestamp) => {
     try{
-        const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/timestamp?${new URLSearchParams({ timestamp })}`);
+        console.log(`${new Date().toLocaleString('ru')} Gonna get nonstandard request for date: `, timestamp);
+        const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/timestamp?${new URLSearchParams({ timestamp, st: process.env.SECRET })}`);
         const result = await response.json();
         console.log(`${new Date().toLocaleString('ru')} Get request result: `, result);
         return result;
