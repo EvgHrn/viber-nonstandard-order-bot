@@ -4,16 +4,32 @@ const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
 
     console.log(`${new Date().toLocaleString('ru')} Gonna save nonstandardOrderRequest: `, nonstandardOrderRequest);
 
-    const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/add`, {
-        method: 'post',
-        body: JSON.stringify({
-            nonstandardOrderRequest,
-            st: process.env.SECRET
-        }),
-        headers: {'Content-Type': 'application/json'}
-    });
-    // const result = await response.json();
-    console.log(`${new Date().toLocaleString('ru')} Saving request response: `, response);
+    try{
+        const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/add`, {
+            method: 'post',
+            body: JSON.stringify({
+                nonstandardOrderRequest,
+                st: process.env.SECRET
+            }),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const result = await response.json();
+        console.log(`${new Date().toLocaleString('ru')} Saving request response: `, result);
+        return result;
+    } catch(e) {
+        return false;
+    }
+}
+
+const getNonstandardOrderRequestFromDbByTimestamp = async(timestamp) => {
+    try{
+        const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/timestamp?${new URLSearchParams({ timestamp })}`);
+        const result = await response.json();
+        console.log(`${new Date().toLocaleString('ru')} Get request result: `, result);
+        return result;
+    } catch (e) {
+        return false;
+    }
 }
 
 const getLastRowIndexWithValue = (sheet) => {
@@ -33,4 +49,5 @@ const getLastRowIndexWithValue = (sheet) => {
 module.exports = {
     saveNonstandardOrderRequest,
     getLastRowIndexWithValue,
+    getNonstandardOrderRequestFromDbByTimestamp
 };

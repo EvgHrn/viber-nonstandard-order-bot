@@ -11,16 +11,15 @@ const fs = require('fs');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const nodemailer = require("nodemailer");
 const {sheetColumns} = require('../constants');
-const {getLastRowIndexWithValue, saveNonstandardOrderRequest} = require('../utils');
+const {
+  getLastRowIndexWithValue,
+  saveNonstandardOrderRequest,
+  getNonstandardOrderRequestFromDbByTimestamp
+} = require('../utils');
 
 const ViberBot = require('viber-bot').Bot;
 const BotEvents = require('viber-bot').Events;
 const TextMessage = require('viber-bot').Message.Text;
-
-// const qs = require('qs');
-// const fetch = require("node-fetch");
-//
-// const parse = require('date-fns/parse');
 
 require('dotenv').config();
 
@@ -60,32 +59,17 @@ const bot = new ViberBot({
   avatar: process.env.AVATAR
 });
 
-const checkNewOrderRequestAndSend = async (oldCountInner) => {
-
-  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
-
-  await doc.useApiKey(process.env.SHEET_API_KEY);
-
-  await doc.loadInfo();
-
-  console.log(`${new Date().toLocaleString('ru')} Doc: `, doc.title);
-
-  const sheet = doc.sheetsByIndex[0];
+const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
 
   const newRowCount = sheet.rowCount;
 
-  console.log(`${new Date().toLocaleString('ru')} New rows count: `, newRowCount);
-  console.log(`${new Date().toLocaleString('ru')} Old rows count: `, oldCountInner);
+  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: New rows count: `, newRowCount);
+  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Old rows count: `, oldCountInner);
 
   oldRowCount = newRowCount;
 
   if((oldCountInner > 0) && (oldCountInner < newRowCount)) {
-    console.log(`${new Date().toLocaleString('ru')} Count changes from ${oldCountInner} to ${newRowCount}`);
-    await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${newRowCount}`);
-    // await sheet.loadCells(`C1:C${newRowCount}`);
-    // await sheet.loadCells(`E1:E${newRowCount}`);
-    // await sheet.loadCells(`I1:I${newRowCount}`);
-    console.log(`${new Date().toLocaleString('ru')} Got cells`);
+    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Count changes from ${oldCountInner} to ${newRowCount}`);
 
     const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
 
@@ -128,9 +112,12 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
         request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
       }
 
-      await saveNonstandardOrderRequest(request);
+      const savingResult = await saveNonstandardOrderRequest(request);
 
-
+      // TODO send saving bad result to service bot
+      if(!savingResult) {
+        continue;
+      }
 
       // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
       // const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
@@ -141,25 +128,25 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
     }
 
     const usersArr = JSON.parse(process.env.USERS_STR).users;
-    console.log(`${new Date().toLocaleString('ru')} Users: `, usersArr);
+    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Users: `, usersArr);
     for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
       const userId = usersArr[userObjIndex].viber_id;
-      console.log(`${new Date().toLocaleString('ru')} Gonna handle user `, userId);
+      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Gonna handle user `, userId);
 
-      console.log(`${new Date().toLocaleString('ru')} lastRowIndexWithValue: `, lastRowIndexWithValue);
+      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: lastRowIndexWithValue: `, lastRowIndexWithValue);
       for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
         const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
         const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
         const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
         const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
         const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
-        console.log(`${new Date().toLocaleString('ru')} Text: `, text);
+        console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Text: `, text);
 
         if(managerNameCell.value === 'Тест') {
-          console.log(`${new Date().toLocaleString('ru')} Test request, so do not send to bot`);
+          console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Test request, so do not send to bot`);
           continue;
         }
-        bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
+        bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на расчёт:\n ${text}`));
       }
 
     }
@@ -167,9 +154,27 @@ const checkNewOrderRequestAndSend = async (oldCountInner) => {
   }
 }
 
-const checkPrecomputationUpdate = async() => {
-
+const checkPrecomputationUpdate = async(sheet) => {
+  const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
+  for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
+    const timestamp = new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue);
+    const request = await getNonstandardOrderRequestFromDbByTimestamp(timestamp);
+    console.log(`${new Date().toLocaleString('ru')} checkPrecomputationUpdate: Request from db: `, request);
+  }
 };
+
+const checkUpdates = async(oldRowCount) => {
+  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
+  await doc.useApiKey(process.env.SHEET_API_KEY);
+  await doc.loadInfo();
+  console.log(`${new Date().toLocaleString('ru')} Doc: `, doc.title);
+  const sheet = doc.sheetsByIndex[0];
+  await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${sheet.rowCount}`);
+  console.log(`${new Date().toLocaleString('ru')} Got cells`);
+
+  checkNewOrderRequestAndSend(sheet, oldRowCount);
+  checkPrecomputationUpdate(sheet);
+}
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -179,7 +184,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   console.log('From: ', response.userProfile.id);
   console.log('Name: ', response.userProfile.name);
   bot.sendMessage({id: process.env.ADMIN_ID}, new TextMessage(`New message from user: ${response.userProfile.id} ${response.userProfile.name}: ${message.text}`));
-  const usersArr = JSON.parse(process.env.USERS_STR).users;
+  // const usersArr = JSON.parse(process.env.USERS_STR).users;
   // console.log('Users: ', usersArr);
   // if(usersArr.some((userObj) => userObj.viber_id === response.userProfile.id)) {
   //   const orderNumber = strToOrderNumber(message.text.trim());
@@ -322,6 +327,8 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-setTimeout(() => checkNewOrderRequestAndSend(oldRowCount), 5000);
 
-setInterval(() => checkNewOrderRequestAndSend(oldRowCount), 60000);
+
+setTimeout(() => checkUpdates(oldRowCount), 5000);
+
+setInterval(() => checkUpdates(oldRowCount), 60000);
