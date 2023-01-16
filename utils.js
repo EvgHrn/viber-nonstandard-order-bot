@@ -7,6 +7,15 @@ const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
     if('_id' in nonstandardOrderRequest) {
         delete nonstandardOrderRequest._id;
     }
+    if('createdAt' in nonstandardOrderRequest) {
+        delete nonstandardOrderRequest.createdAt;
+    }
+    if('updatedAt' in nonstandardOrderRequest) {
+        delete nonstandardOrderRequest.updatedAt;
+    }
+    if('__v' in nonstandardOrderRequest) {
+        delete nonstandardOrderRequest.__v;
+    }
 
     try{
         const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/add`, {
@@ -31,6 +40,9 @@ const getNonstandardOrderRequestFromDbByTimestamp = async(timestamp) => {
         const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/timestamp?${new URLSearchParams({ timestamp, st: process.env.SECRET })}`);
         const result = await response.json();
         // console.log(`${new Date().toLocaleString('ru')} Got request result length: `, result.length);
+        if(!result.length) {
+            return false;
+        }
         const lastOne = result.reduce((acc, requestObj) => {
             if(new Date(requestObj.updatedAt) > new Date(acc.updatedAt)) {
                 acc = requestObj;
