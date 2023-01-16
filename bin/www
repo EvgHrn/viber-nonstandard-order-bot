@@ -354,24 +354,30 @@ const checkPrecomputationUpdate = async(sheet) => {
     if(sheetCalculation !== dbCalculation) {
       if(sheetCalculation.length && !dbCalculation.length) {
         emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetCalculation}\n`;
-      } else {
+      } else if(sheetCalculation && sheetCalculation.length){
         emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n${sheetCalculation}\n`;
+      } else {
+        emailText = `${emailText}Удалён расчёт из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetDuration !== dbDuration) {
-      if(sheetDuration.length && !dbDuration.length) {
+      if(sheetDuration && sheetDuration.length && !dbDuration.length) {
         emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetDuration}\n`;
-      } else {
+      } else if(sheetDuration && sheetDuration.length){
         emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n${sheetDuration}\n`;
+      } else {
+        emailText = `${emailText}Удалён срок из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetComment !== dbComment) {
       if(sheetComment.length && !dbComment.length) {
         emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetComment}\n`;
-      } else {
+      } else if(sheetComment && sheetComment.length){
         emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n${sheetComment}\n`;
+      } else {
+        emailText = `${emailText}Удалён комментарий из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
