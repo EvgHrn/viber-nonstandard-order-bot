@@ -311,7 +311,7 @@ const checkPrecomputationUpdate = async(sheet) => {
   const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
 
   // handle all rows with data
-  for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
+  for(let rowIndex = 1; rowIndex <= lastRowIndexWithValue; rowIndex++) {
     const timestamp = sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue;
 
     // get data from db
@@ -353,9 +353,9 @@ const checkPrecomputationUpdate = async(sheet) => {
 
     if(sheetCalculation !== dbCalculation) {
       if(sheetCalculation && sheetCalculation.length && !dbCalculation.length) {
-        emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetCalculation}\n`;
+        emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetCalculation}\n\n`;
       } else if(sheetCalculation && sheetCalculation.length){
-        emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n${sheetCalculation}\n`;
+        emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n\n${sheetCalculation}\n\n`;
       } else {
         emailText = `${emailText}Удалён расчёт из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
@@ -363,9 +363,9 @@ const checkPrecomputationUpdate = async(sheet) => {
 
     if(sheetDuration !== dbDuration) {
       if(sheetDuration && sheetDuration.length && !dbDuration.length) {
-        emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetDuration}\n`;
+        emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetDuration}\n\n`;
       } else if(sheetDuration && sheetDuration.length){
-        emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n${sheetDuration}\n`;
+        emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n\n${sheetDuration}\n\n`;
       } else {
         emailText = `${emailText}Удалён срок из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
@@ -373,9 +373,9 @@ const checkPrecomputationUpdate = async(sheet) => {
 
     if(sheetComment !== dbComment) {
       if(sheetComment && sheetComment.length && !dbComment.length) {
-        emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetComment}\n`;
+        emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
       } else if(sheetComment && sheetComment.length){
-        emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n${sheetComment}\n`;
+        emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
       } else {
         emailText = `${emailText}Удалён комментарий из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
