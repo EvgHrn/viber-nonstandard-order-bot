@@ -352,7 +352,7 @@ const checkPrecomputationUpdate = async(sheet) => {
     let emailText = '';
 
     if(sheetCalculation !== dbCalculation) {
-      if(sheetCalculation.length && !dbCalculation.length) {
+      if(sheetCalculation && sheetCalculation.length && !dbCalculation.length) {
         emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetCalculation}\n`;
       } else if(sheetCalculation && sheetCalculation.length){
         emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n${sheetCalculation}\n`;
@@ -372,7 +372,7 @@ const checkPrecomputationUpdate = async(sheet) => {
     }
 
     if(sheetComment !== dbComment) {
-      if(sheetComment.length && !dbComment.length) {
+      if(sheetComment && sheetComment.length && !dbComment.length) {
         emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetComment}\n`;
       } else if(sheetComment && sheetComment.length){
         emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n${sheetComment}\n`;
