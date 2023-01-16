@@ -27,7 +27,13 @@ const getNonstandardOrderRequestFromDbByTimestamp = async(timestamp) => {
         const response = await fetch(`${process.env.BACK_HOST}v2/nonstandardOrderRequests/timestamp?${new URLSearchParams({ timestamp, st: process.env.SECRET })}`);
         const result = await response.json();
         console.log(`${new Date().toLocaleString('ru')} Get request result: `, result);
-        return result;
+        const lastOne = result.reduce((acc, requestObj) => {
+            if(new Date(requestObj.updatedAt) > new Date(acc.updatedAt)) {
+                acc = requestObj;
+            }
+            return acc;
+        }, result[0]);
+        return lastOne;
     } catch (e) {
         return false;
     }

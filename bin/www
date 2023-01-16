@@ -33,14 +33,15 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async(mailTransporter, to, text) => {
-  console.log(`${new Date().toLocaleString('ru')} Gonna send text email`);
+const sendEmail = async(mailTransporter, toEmail, toName, text) => {
+  console.log(`${new Date().toLocaleString('ru')} Gonna send text email with email and name: `, toEmail, toName);
   let info = await mailTransporter.sendMail({
-    from: `"Fred Foo 👻" <${process.env.POST_USER}>`, // sender address
-    to: process.env.EMAIL_FOR_TEST, // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
+    from: `"Нестандартные расчёты" <${process.env.POST_USER}>`, // sender address
+    // to: process.env.EMAIL_FOR_TEST, // list of receivers
+    to: toEmail,
+    subject: `Нестандартные расчёты для ${toName}`, // Subject line
+    text, // plain text body
+    // html: "<b>Hello world?</b>", // html body
   });
 
   console.log(`${new Date().toLocaleString('ru')} Message sent: %s`, info.messageId);
@@ -58,151 +59,6 @@ const bot = new ViberBot({
   name: process.env.NAME,
   avatar: process.env.AVATAR
 });
-
-const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
-
-  const newRowCount = sheet.rowCount;
-
-  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: New rows count: `, newRowCount);
-  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Old rows count: `, oldCountInner);
-
-  oldRowCount = newRowCount;
-
-  if((oldCountInner > 0) && (oldCountInner < newRowCount)) {
-    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Count changes from ${oldCountInner} to ${newRowCount}`);
-
-    const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
-
-    for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
-      // send to back new requests
-      const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
-      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell value: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value);
-      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell valueType: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).valueType);
-      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formattedValue: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue);
-      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formula: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formula);
-      // console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
-      const request = {
-        timestamp: sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue,
-        email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
-        managerName: sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`).value,
-        clientStatus: sheet.getCellByA1(`${sheetColumns.clientStatus}${rowIndexForHandle}`).value,
-        productName: sheet.getCellByA1(`${sheetColumns.productName}${rowIndexForHandle}`).value,
-        description: sheet.getCellByA1(`${sheetColumns.description}${rowIndexForHandle}`).value,
-        quantity: sheet.getCellByA1(`${sheetColumns.quantity}${rowIndexForHandle}`).value,
-        region: sheet.getCellByA1(`${sheetColumns.region}${rowIndexForHandle}`).value
-      }
-
-      if(sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value) {
-        request.attachments = sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value;
-      }
-
-      if(sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value) {
-        request.calculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value;
-      }
-
-      if(sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value) {
-        request.duration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value;
-      }
-
-      if(sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value) {
-        request.comment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value;
-      }
-
-      if(sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value) {
-        request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
-      }
-
-      const savingResult = await saveNonstandardOrderRequest(request);
-
-      // TODO send saving bad result to service bot
-      if(!savingResult) {
-        continue;
-      }
-
-      // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
-      // const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
-      // const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
-      // const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
-      // console.log(`${new Date().toLocaleString('ru')} Text: `, text);
-      // bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
-    }
-
-    const usersArr = JSON.parse(process.env.USERS_STR).users;
-    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Users: `, usersArr);
-    for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
-      const userId = usersArr[userObjIndex].viber_id;
-      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Gonna handle user `, userId);
-
-      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: lastRowIndexWithValue: `, lastRowIndexWithValue);
-      for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
-        const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
-        const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
-        const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
-        const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
-        const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
-        console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Text: `, text);
-
-        if(managerNameCell.value === 'Тест') {
-          console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Test request, so do not send to bot`);
-          continue;
-        }
-        bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на расчёт:\n ${text}`));
-      }
-
-    }
-
-  }
-}
-
-const checkPrecomputationUpdate = async(sheet) => {
-
-
-  const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
-  for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
-    const timestamp = sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue;
-
-    // get data from db
-    // {
-    //   _id: '63bfef9f6c2ef30059f6a5ae',
-    //       timestamp: '2023-12-01T11:31:16.000Z',
-    //     email: 'nsb@inari.pro',
-    //     managerName: 'Комлева Екатерина',
-    //     clientStatus: 'без статуса',
-    //     productName: 'акрил',
-    //     description: '400х300 мм ЭКСТРУЗИЯ зеркальное золото 1,5 мм',
-    //     quantity: '200шт/400шт',
-    //     region: 'Р8 Екатеринбург',
-    //     createdAt: '2023-01-12T11:31:43.754Z',
-    //     updatedAt: '2023-01-12T11:31:43.754Z',
-    //     __v: 0
-    // }
-    const request = await getNonstandardOrderRequestFromDbByTimestamp(timestamp);
-    console.log(`${new Date().toLocaleString('ru')} checkPrecomputationUpdate: Request from db: `, request);
-
-    // get data from sheet
-
-    // compare data
-
-    // if change send to manager and update in db
-
-
-  }
-
-
-};
-
-const checkUpdates = async(oldRowCount) => {
-  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
-  await doc.useApiKey(process.env.SHEET_API_KEY);
-  await doc.loadInfo();
-  console.log(`${new Date().toLocaleString('ru')} Doc: `, doc.title);
-  const sheet = doc.sheetsByIndex[0];
-  await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${sheet.rowCount}`);
-  console.log(`${new Date().toLocaleString('ru')} Got cells`);
-
-  checkNewOrderRequestAndSend(sheet, oldRowCount);
-  checkPrecomputationUpdate(sheet);
-}
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
   // Echo's back the message to the client. Your bot logic should sit here.
@@ -355,6 +211,208 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
+const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
+
+  const newRowCount = sheet.rowCount;
+
+  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: New rows count: `, newRowCount);
+  console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Old rows count: `, oldCountInner);
+
+  oldRowCount = newRowCount;
+
+  if((oldCountInner > 0) && (oldCountInner < newRowCount)) {
+    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Count changes from ${oldCountInner} to ${newRowCount}`);
+
+    const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
+
+    for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
+      // send to back new requests
+      const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell value: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell valueType: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).valueType);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formattedValue: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp cell formula: `, sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formula);
+      // console.log(`${new Date().toLocaleString('ru')} Timestamp date: `, new Date(sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).value));
+      const request = {
+        timestamp: sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndexForHandle}`).formattedValue,
+        email: sheet.getCellByA1(`${sheetColumns.email}${rowIndexForHandle}`).value,
+        managerName: sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`).value,
+        clientStatus: sheet.getCellByA1(`${sheetColumns.clientStatus}${rowIndexForHandle}`).value,
+        productName: sheet.getCellByA1(`${sheetColumns.productName}${rowIndexForHandle}`).value,
+        description: sheet.getCellByA1(`${sheetColumns.description}${rowIndexForHandle}`).value,
+        quantity: sheet.getCellByA1(`${sheetColumns.quantity}${rowIndexForHandle}`).value,
+        region: sheet.getCellByA1(`${sheetColumns.region}${rowIndexForHandle}`).value
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value) {
+        request.attachments = sheet.getCellByA1(`${sheetColumns.attachments}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value) {
+        request.calculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value) {
+        request.duration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value) {
+        request.comment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndexForHandle}`).value;
+      }
+
+      if(sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value) {
+        request.specificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndexForHandle}`).value;
+      }
+
+      const savingResult = await saveNonstandardOrderRequest(request);
+
+      // TODO send saving bad result to service bot
+      if(!savingResult) {
+        continue;
+      }
+
+      // const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
+      // const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
+      // const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
+      // const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
+      // console.log(`${new Date().toLocaleString('ru')} Text: `, text);
+      // bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на просчёт:\n ${text}`));
+    }
+
+    const usersArr = JSON.parse(process.env.USERS_STR).users;
+    console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Users: `, usersArr);
+    for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
+      const userId = usersArr[userObjIndex].viber_id;
+      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Gonna handle user `, userId);
+
+      console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: lastRowIndexWithValue: `, lastRowIndexWithValue);
+      for(let rowIndex = 0; rowIndex < (newRowCount - oldCountInner); rowIndex++) {
+        const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
+        const managerNameCell = sheet.getCellByA1(`C${rowIndexForHandle}`);
+        const productNameCell = sheet.getCellByA1(`E${rowIndexForHandle}`);
+        const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
+        const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
+        console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Text: `, text);
+
+        if(managerNameCell.value === 'Тест') {
+          console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Test request, so do not send to bot`);
+          continue;
+        }
+        bot.sendMessage({id: userId}, new TextMessage(`Новый запрос на расчёт:\n ${text}`));
+      }
+
+    }
+
+  }
+}
+
+const checkPrecomputationUpdate = async(sheet) => {
+
+  const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
+
+  // handle all rows with data
+  for(let rowIndex = 1; rowIndex < lastRowIndexWithValue; rowIndex++) {
+    const timestamp = sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue;
+
+    // get data from db
+    // {
+    //   _id: '63bfef9f6c2ef30059f6a5ae',
+    //       timestamp: '2023-12-01T11:31:16.000Z',
+    //     email: 'nsb@inari.pro',
+    //     managerName: 'Комлева Екатерина',
+    //     clientStatus: 'без статуса',
+    //     productName: 'акрил',
+    //     description: '400х300 мм ЭКСТРУЗИЯ зеркальное золото 1,5 мм',
+    //     quantity: '200шт/400шт',
+    //     region: 'Р8 Екатеринбург',
+    //     createdAt: '2023-01-12T11:31:43.754Z',
+    //     updatedAt: '2023-01-12T11:31:43.754Z',
+    //     __v: 0
+    // }
+    const request = await getNonstandardOrderRequestFromDbByTimestamp(timestamp);
+    console.log(`${new Date().toLocaleString('ru')} checkPrecomputationUpdate: Last nonstandardOrderRequest from db: `, request);
+
+    if(!request) {
+      // TODO send to service bot
+      continue;
+    }
+
+    // get data from sheet
+    const sheetCalculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value;
+    const dbCalculation = ('calculation' in request) ? request.calculation : '';
+    const sheetDuration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value;
+    const dbDuration = ('duration' in request) ? request.duration : '';
+    const sheetComment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value;
+    const dbComment = ('comment' in request) ? request.comment : '';
+    const sheetSpecificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value;
+    const dbSpecificationPath = ('specificationPath' in request) ? request.specificationPath : '';
+
+    // compare data
+
+    let emailText = '';
+
+    if(sheetCalculation !== dbCalculation) {
+      if(sheetCalculation.length && !dbCalculation.length) {
+        emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetCalculation}\n`;
+      } else {
+        emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n${sheetCalculation}\n`;
+      }
+    }
+
+    if(sheetDuration !== dbDuration) {
+      if(sheetDuration.length && !dbDuration.length) {
+        emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetDuration}\n`;
+      } else {
+        emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n${sheetDuration}\n`;
+      }
+    }
+
+    if(sheetComment !== dbComment) {
+      if(sheetComment.length && !dbComment.length) {
+        emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n${sheetComment}\n`;
+      } else {
+        emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n${sheetComment}\n`;
+      }
+    }
+
+    // if change send to manager and update in db
+    if(emailText.length || (sheetSpecificationPath !== dbSpecificationPath)) {
+      console.log(`${new Date().toLocaleString('ru')} New email text or new spec path: `, emailText, sheetSpecificationPath);
+      if(emailText.length) {
+        // send email
+        sendEmail(
+          transporter,
+          sheet.getCellByA1(`${sheetColumns.email}${rowIndex}`).value,
+          sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
+          emailText
+        )
+      }
+      const savingResult = await saveNonstandardOrderRequest({
+        ...request,
+        calculation: sheetCalculation,
+        duration: sheetDuration,
+        comment: sheetComment,
+        specificationPath: sheetSpecificationPath
+      });
+    }
+
+  }
+
+
+};
+
+const checkUpdates = async(oldRowCount) => {
+  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
+  await doc.useApiKey(process.env.SHEET_API_KEY);
+  await doc.loadInfo();
+  console.log(`${new Date().toLocaleString('ru')} Doc: `, doc.title);
+  const sheet = doc.sheetsByIndex[0];
+  await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${sheet.rowCount}`);
+  console.log(`${new Date().toLocaleString('ru')} Got cells`);
+
+  checkNewOrderRequestAndSend(sheet, oldRowCount);
+  checkPrecomputationUpdate(sheet);
+}
 
 
 setTimeout(() => checkUpdates(oldRowCount), 5000);
