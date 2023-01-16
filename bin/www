@@ -340,12 +340,16 @@ const checkPrecomputationUpdate = async(sheet) => {
     // get data from sheet
     const sheetCalculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value : '';
     const dbCalculation = (('calculation' in request) && request.calculation) ? request.calculation : '';
+    console.log(`${new Date().toLocaleString('ru')} sheetCalculation, dbCalculation: ${sheetCalculation}, ${dbCalculation}`);
     const sheetDuration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value : '';
     const dbDuration = (('duration' in request) && request.duration) ? request.duration : '';
+    console.log(`${new Date().toLocaleString('ru')} sheetDuration, dbDuration: ${sheetDuration}, ${dbDuration}`);
     const sheetComment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value : '';
     const dbComment = (('comment' in request) && request.comment) ? request.comment : '';
+    console.log(`${new Date().toLocaleString('ru')} sheetComment, dbComment: ${sheetComment}, ${dbComment}`);
     const sheetSpecificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value : '';
     const dbSpecificationPath = (('specificationPath' in request) && request.specificationPath) ? request.specificationPath : '';
+    console.log(`${new Date().toLocaleString('ru')} sheetSpecificationPath, dbSpecificationPath: ${sheetSpecificationPath}, ${dbSpecificationPath}`);
 
     // compare data
 
@@ -396,6 +400,15 @@ const checkPrecomputationUpdate = async(sheet) => {
       }
       if('_id' in request) {
         delete request._id;
+      }
+      if('createdAt' in request) {
+        delete request.createdAt;
+      }
+      if('updatedAt' in request) {
+        delete request.updatedAt;
+      }
+      if('__v' in request) {
+        delete request.__v;
       }
       const savingResult = await saveNonstandardOrderRequest({
         ...request,
