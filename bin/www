@@ -394,6 +394,9 @@ const checkPrecomputationUpdate = async(sheet) => {
           emailText
         )
       }
+      if('_id' in request) {
+        delete request._id;
+      }
       const savingResult = await saveNonstandardOrderRequest({
         ...request,
         calculation: sheetCalculation,
