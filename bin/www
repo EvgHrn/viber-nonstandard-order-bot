@@ -388,7 +388,8 @@ const checkPrecomputationUpdate = async(sheet) => {
         // send email
         sendEmail(
           transporter,
-          sheet.getCellByA1(`${sheetColumns.email}${rowIndex}`).value,
+          // sheet.getCellByA1(`${sheetColumns.email}${rowIndex}`).value,
+          process.env.EMAIL_FOR_TEST,
           sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
           emailText
         )
