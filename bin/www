@@ -338,45 +338,45 @@ const checkPrecomputationUpdate = async(sheet) => {
     }
 
     // get data from sheet
-    const sheetCalculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value;
-    const dbCalculation = ('calculation' in request) ? request.calculation : '';
-    const sheetDuration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value;
-    const dbDuration = ('duration' in request) ? request.duration : '';
-    const sheetComment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value;
-    const dbComment = ('comment' in request) ? request.comment : '';
-    const sheetSpecificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value;
-    const dbSpecificationPath = ('specificationPath' in request) ? request.specificationPath : '';
+    const sheetCalculation = sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.calculation}${rowIndex}`).value : '';
+    const dbCalculation = (('calculation' in request) && request.calculation) ? request.calculation : '';
+    const sheetDuration = sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.duration}${rowIndex}`).value : '';
+    const dbDuration = (('duration' in request) && request.duration) ? request.duration : '';
+    const sheetComment = sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.comment}${rowIndex}`).value : '';
+    const dbComment = (('comment' in request) && request.comment) ? request.comment : '';
+    const sheetSpecificationPath = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value ? sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value : '';
+    const dbSpecificationPath = (('specificationPath' in request) && request.specificationPath) ? request.specificationPath : '';
 
     // compare data
 
     let emailText = '';
 
     if(sheetCalculation !== dbCalculation) {
-      if(sheetCalculation && sheetCalculation.length && !dbCalculation.length) {
+      if(sheetCalculation.length && !dbCalculation.length) {
         emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetCalculation}\n\n`;
-      } else if(sheetCalculation && sheetCalculation.length){
+      } else if(sheetCalculation.length && dbCalculation.length){
         emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n\n${sheetCalculation}\n\n`;
-      } else if(dbCalculation && dbCalculation.length){
+      } else if(!sheetCalculation.length && dbCalculation.length){
         emailText = `${emailText}Удалён расчёт из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetDuration !== dbDuration) {
-      if(sheetDuration && sheetDuration.length && !dbDuration.length) {
+      if(sheetDuration.length && !dbDuration.length) {
         emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetDuration}\n\n`;
-      } else if(sheetDuration && sheetDuration.length){
+      } else if(sheetDuration.length && dbDuration.length){
         emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n\n${sheetDuration}\n\n`;
-      } else if(dbDuration && dbDuration.length){
+      } else if(!sheetDuration.length && dbDuration.length){
         emailText = `${emailText}Удалён срок из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetComment !== dbComment) {
-      if(sheetComment && sheetComment.length && !dbComment.length) {
+      if(sheetComment.length && !dbComment.length) {
         emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
-      } else if(sheetComment && sheetComment.length){
+      } else if(sheetComment.length && dbComment.length){
         emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
-      } else if(dbComment && dbComment.length){
+      } else if(!sheetComment.length && dbComment.length){
         emailText = `${emailText}Удалён комментарий из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
