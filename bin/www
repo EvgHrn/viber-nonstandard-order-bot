@@ -398,6 +398,13 @@ const checkPrecomputationUpdate = async(sheet) => {
           emailText
         )
       }
+      if(sheetSpecificationPath !== dbSpecificationPath) {
+        const usersArr = JSON.parse(process.env.USERS_STR).users;
+        for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
+          const userId = usersArr[userObjIndex].viber_id;
+          bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация:\n ${text}`));
+        }
+      }
       if('_id' in request) {
         delete request._id;
       }
