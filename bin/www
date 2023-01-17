@@ -418,7 +418,11 @@ const checkPrecomputationUpdate = async(sheet) => {
         const sheetProduct = sheet.getCellByA1(`${sheetColumns.productName}${rowIndex}`).value;
         for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
           const userId = usersArr[userObjIndex].viber_id;
-          bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на ${sheetProduct}:\n ${sheetSpec}`));
+          if(!sheetSpecificationPath || sheetSpecificationPath === 'null' || (sheetSpecificationPath && !sheetSpecificationPath.length)) {
+            bot.sendMessage({id: userId}, new TextMessage(`Удалена спецификация на ${sheetProduct}:\n ${sheetSpec}`));
+          } else {
+            bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на ${sheetProduct}:\n ${sheetSpec}`));
+          }
         }
       }
       if('_id' in request) {
@@ -459,23 +463,6 @@ const checkUpdates = async(oldRowCount) => {
   checkNewOrderRequestAndSend(sheet, oldRowCount);
   checkPrecomputationUpdate(sheet);
 }
-
-/*
-
-test:
-- add calculation
-- add duration
-- add comment
-- change calculation
-- change duration
-- change comment
-- delete calculation
-- delete duration
-- delete comment
-- add specification
-- change spectification
-- delete specification
- */
 
 setTimeout(() => checkUpdates(oldRowCount), 5000);
 
