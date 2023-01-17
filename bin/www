@@ -466,4 +466,4 @@ const checkUpdates = async(oldRowCount) => {
 
 setTimeout(() => checkUpdates(oldRowCount), 5000);
 
-setInterval(() => checkUpdates(oldRowCount), 60000);
+setInterval(() => checkUpdates(oldRowCount), 120000);
