@@ -419,7 +419,7 @@ const checkPrecomputationUpdate = async(sheet) => {
         for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
           const userId = usersArr[userObjIndex].viber_id;
           if(!sheetSpecificationPath || sheetSpecificationPath === 'null' || (sheetSpecificationPath && !sheetSpecificationPath.length)) {
-            bot.sendMessage({id: userId}, new TextMessage(`Удалена спецификация на ${sheetProduct}:\n ${sheetSpec}`));
+            bot.sendMessage({id: userId}, new TextMessage(`Удалена спецификация на ${sheetProduct}`));
           } else {
             bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на ${sheetProduct}:\n ${sheetSpec}`));
           }
