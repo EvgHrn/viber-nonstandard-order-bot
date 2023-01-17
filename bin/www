@@ -414,9 +414,11 @@ const checkPrecomputationUpdate = async(sheet) => {
       }
       if(sheetSpecificationPath !== dbSpecificationPath) {
         const usersArr = JSON.parse(process.env.USERS_STR).users;
+        const sheetSpec = sheet.getCellByA1(`${sheetColumns.specificationPath}${rowIndex}`).value;
+        const sheetProduct = sheet.getCellByA1(`${sheetColumns.productName}${rowIndex}`).value;
         for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
           const userId = usersArr[userObjIndex].viber_id;
-          bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация:\n ${text}`));
+          bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на ${sheetProduct}:\n ${sheetSpec}`));
         }
       }
       if('_id' in request) {
