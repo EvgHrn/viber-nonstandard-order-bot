@@ -390,13 +390,27 @@ const checkPrecomputationUpdate = async(sheet) => {
       console.log(`${new Date().toLocaleString('ru')} New email text or new spec path: `, emailText, sheetSpecificationPath);
       if(emailText.length) {
         // send email
-        sendEmail(
-          transporter,
-          // sheet.getCellByA1(`${sheetColumns.email}${rowIndex}`).value,
-          process.env.EMAIL_FOR_TEST,
-          sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
-          emailText
-        )
+        if(`${sheet.getCellByA1(`${sheetColumns.email}${rowIndex}`).value}` === process.env.SPB_EMAIL) {
+          sendEmail(
+            transporter,
+            process.env.SPB_EMAIL,
+            sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
+            emailText
+          )
+          sendEmail(
+            transporter,
+            process.env.EMAIL_FOR_TEST,
+            sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
+            emailText
+          )
+        } else {
+          sendEmail(
+              transporter,
+              process.env.EMAIL_FOR_TEST,
+              sheet.getCellByA1(`${sheetColumns.managerName}${rowIndex}`).value,
+              emailText
+          )
+        }
       }
       if(sheetSpecificationPath !== dbSpecificationPath) {
         const usersArr = JSON.parse(process.env.USERS_STR).users;
@@ -444,6 +458,22 @@ const checkUpdates = async(oldRowCount) => {
   checkPrecomputationUpdate(sheet);
 }
 
+/*
+
+test:
+- add calculation
+- add duration
+- add comment
+- change calculation
+- change duration
+- change comment
+- delete calculation
+- delete duration
+- delete comment
+- add specification
+- change spectification
+- delete specification
+ */
 
 setTimeout(() => checkUpdates(oldRowCount), 5000);
 
