@@ -290,7 +290,7 @@ const checkNewOrderRequestAndSend = async (sheet, oldCountInner) => {
         const rowIndexForHandle = lastRowIndexWithValue -  rowIndex;
         const managerNameCell = sheet.getCellByA1(`${sheetColumns.managerName}${rowIndexForHandle}`);
         const productNameCell = sheet.getCellByA1(`${sheetColumns.productName}${rowIndexForHandle}`);
-        const regionCell = sheet.getCellByA1(`I${rowIndexForHandle}`);
+        const regionCell = sheet.getCellByA1(`${sheetColumns.region}${rowIndexForHandle}`);
         const text = `${regionCell.value}, ${managerNameCell.value}, ${productNameCell.value}`;
         console.log(`${new Date().toLocaleString('ru')} checkNewOrderRequestAndSend: Text: `, text);
 
