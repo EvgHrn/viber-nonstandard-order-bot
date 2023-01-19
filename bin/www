@@ -357,31 +357,31 @@ const checkPrecomputationUpdate = async(sheet) => {
 
     if(sheetCalculation !== dbCalculation) {
       if(sheetCalculation.length && !dbCalculation.length) {
-        emailText = `${emailText}Добавлен расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetCalculation}\n\n`;
+        emailText = `${emailText}Добавлен расчёт на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetCalculation}\n\n`;
       } else if(sheetCalculation.length && dbCalculation.length){
-        emailText = `${emailText}Изменён расчёт на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n\n${sheetCalculation}\n\n`;
+        emailText = `${emailText}Изменён расчёт на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity} с\n${dbCalculation}\nна:\n\n${sheetCalculation}\n\n`;
       } else if(!sheetCalculation.length && dbCalculation.length){
-        emailText = `${emailText}Удалён расчёт из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
+        emailText = `${emailText}Удалён расчёт из вашего запроса номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetDuration !== dbDuration) {
       if(sheetDuration.length && !dbDuration.length) {
-        emailText = `${emailText}Добавлен срок на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetDuration}\n\n`;
+        emailText = `${emailText}Добавлен срок на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetDuration}\n\n`;
       } else if(sheetDuration.length && dbDuration.length){
-        emailText = `${emailText}Изменён срок на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n\n${sheetDuration}\n\n`;
+        emailText = `${emailText}Изменён срок на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity} с\n${dbDuration}\nна:\n\n${sheetDuration}\n\n`;
       } else if(!sheetDuration.length && dbDuration.length){
-        emailText = `${emailText}Удалён срок из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
+        emailText = `${emailText}Удалён срок из вашего запроса номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
     if(sheetComment !== dbComment) {
       if(sheetComment.length && !dbComment.length) {
-        emailText = `${emailText}Добавлен комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
+        emailText = `${emailText}Добавлен комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
       } else if(sheetComment.length && dbComment.length){
-        emailText = `${emailText}Изменён комментарий на ваш запрос на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
+        emailText = `${emailText}Изменён комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
       } else if(!sheetComment.length && dbComment.length){
-        emailText = `${emailText}Удалён комментарий из вашего запроса на ${request.productName} с тиражом ${request.quantity}\n`;
+        emailText = `${emailText}Удалён комментарий из вашего запроса номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}\n`;
       }
     }
 
@@ -416,9 +416,9 @@ const checkPrecomputationUpdate = async(sheet) => {
         for(let userObjIndex = 0; userObjIndex < usersArr.length; userObjIndex++) {
           const userId = usersArr[userObjIndex].viber_id;
           if(!sheetSpecificationPath || sheetSpecificationPath === 'null' || (sheetSpecificationPath && !sheetSpecificationPath.length)) {
-            bot.sendMessage({id: userId}, new TextMessage(`Удалена спецификация на ${sheetProduct}`));
+            bot.sendMessage({id: userId}, new TextMessage(`Удалена спецификация на запрос номер ${rowIndex} на ${sheetProduct}`));
           } else {
-            bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на ${sheetProduct}:\n ${sheetSpec}`));
+            bot.sendMessage({id: userId}, new TextMessage(`Новая спецификация на запрос номер ${rowIndex} на ${sheetProduct}:\n ${sheetSpec}`));
           }
         }
       }
