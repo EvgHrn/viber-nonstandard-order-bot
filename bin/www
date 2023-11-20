@@ -310,8 +310,8 @@ const checkPrecomputationUpdate = async(sheet) => {
 
   const lastRowIndexWithValue = getLastRowIndexWithValue(sheet);
 
-  // handle all rows with data
-  for(let rowIndex = 1; rowIndex <= lastRowIndexWithValue; rowIndex++) {
+  // handle last 200 rows with data
+  for(let rowIndex = (lastRowIndexWithValue - 200); rowIndex <= lastRowIndexWithValue; rowIndex++) {
     const timestamp = sheet.getCellByA1(`${sheetColumns.timestamp}${rowIndex}`).formattedValue;
 
     // get data from db

@@ -30,6 +30,7 @@ const saveNonstandardOrderRequest = async(nonstandardOrderRequest) => {
         console.log(`${new Date().toLocaleString('ru')} Saving request response: `, result);
         return result;
     } catch(e) {
+        console.error(`${new Date().toLocaleString('ru')} Saving request error: `, e);
         return false;
     }
 }
@@ -56,8 +57,9 @@ const getNonstandardOrderRequestFromDbByTimestamp = async(timestamp) => {
 }
 
 const getLastRowIndexWithValue = (sheet) => {
+    console.log(`${new Date().toLocaleString('ru')} Gonna get last row`);
     const newRowCount = sheet.rowCount;
-    let lastRowIndexWithValue = 0;
+    let lastRowIndexWithValue = 1;
     for(let index = 0; index < newRowCount; index++) {
         console.log(`${new Date().toLocaleString('ru')} Gonna check cell C${index+1}`);
         console.log(`${new Date().toLocaleString('ru')} Value of cell C${index+1}: `, sheet.getCellByA1(`C${index+1}`).value);
@@ -66,6 +68,7 @@ const getLastRowIndexWithValue = (sheet) => {
             break;
         }
     }
+    console.log(`${new Date().toLocaleString('ru')} Last row index: `, lastRowIndexWithValue);
     return lastRowIndexWithValue;
 }
 
