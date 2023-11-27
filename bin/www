@@ -375,15 +375,15 @@ const checkPrecomputationUpdate = async(sheet) => {
       }
     }
 
-    if(sheetComment !== dbComment) {
-      if(sheetComment.length && !dbComment.length) {
-        emailText = `${emailText}Добавлен комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
-      } else if(sheetComment.length && dbComment.length){
-        emailText = `${emailText}Изменён комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
-      } else if(!sheetComment.length && dbComment.length){
-        emailText = `${emailText}Удалён комментарий из вашего запроса номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}\n`;
-      }
-    }
+    // if(sheetComment !== dbComment) {
+    //   if(sheetComment.length && !dbComment.length) {
+    //     emailText = `${emailText}Добавлен комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}:\n\n${sheetComment}\n\n`;
+    //   } else if(sheetComment.length && dbComment.length){
+    //     emailText = `${emailText}Изменён комментарий на ваш запрос номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity} с\n${dbComment}\nна:\n\n${sheetComment}\n\n`;
+    //   } else if(!sheetComment.length && dbComment.length){
+    //     emailText = `${emailText}Удалён комментарий из вашего запроса номер ${rowIndex} на ${request.productName} с тиражом ${request.quantity}\n`;
+    //   }
+    // }
 
     // if change send to manager and update in db
     if(emailText.length || (sheetSpecificationPath !== dbSpecificationPath)) {
