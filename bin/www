@@ -449,11 +449,12 @@ const checkPrecomputationUpdate = async(sheet) => {
 };
 
 const checkUpdates = async(oldRowCount) => {
-  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
-  await doc.useApiKey(process.env.SHEET_API_KEY);
+  const doc = new GoogleSpreadsheet(process.env.SHEET_ID, {apiKey: process.env.SHEET_API_KEY});
+  // await doc.useApiKey(process.env.SHEET_API_KEY);
   await doc.loadInfo();
   console.log(`${new Date().toLocaleString('ru')} Doc: `, doc.title);
-  const sheet = doc.sheetsByIndex[0];
+  const sheet = doc.sheetsByIndex[1];
+  console.log(`${new Date().toLocaleString('ru')} Sheet: `, sheet.title);
   await sheet.loadCells(`${sheetColumns.timestamp}1:${sheetColumns.specificationPath}${sheet.rowCount}`);
   console.log(`${new Date().toLocaleString('ru')} Got cells`);
 
